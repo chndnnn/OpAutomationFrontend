@@ -1,6 +1,13 @@
 import { useState } from "react";
+import Spinner from "./Spinner";
 
-const PopUp = ({ errorDetails, onModalCloseClick, description, header }) => {
+const PopUp = ({
+  errorDetails,
+  onModalCloseClick,
+  description,
+  header,
+  onFilterClicked,
+}) => {
   const [choosenHeader, setChoosenHeader] = useState([]);
 
   function onCheckBoxChange(e, key) {
@@ -50,8 +57,8 @@ const PopUp = ({ errorDetails, onModalCloseClick, description, header }) => {
           </button>
           {description && (
             <button
-              onClick={() => onModalCloseClick()}
-              className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring focus:ring-red-300"
+              onClick={() => onFilterClicked(choosenHeader)}
+              className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring focus:ring-red-300"
             >
               Done
             </button>

@@ -1,7 +1,17 @@
-export const parseExcelDate = (serial) => {
-  if (!serial) return null;
-  const epoch = new Date(Date.UTC(1900, 0, 1)); // Excel's epoch (Jan 1, 1900)
-  const days = serial - 2; // Excel serial includes an extra leap year day for 1900
-  epoch.setDate(epoch.getDate() + days);
-  return epoch.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+export const parseExcelDate = (excelDate) => {
+  if (!excelDate) {
+    // If the date value is empty or undefined, return null or a placeholder
+    return null;
+  }
+
+  // Check if the value is a valid number (for Excel serial dates)
+  if (typeof excelDate === "number") {
+    const date = new Date((excelDate - 25569) * 86400 * 1000); // Convert Excel serial date to JS Date
+    return isNaN(date.getTime()) ? null : date.toISOString();
+  }
+
+  // If the value is a string, try parsing it
+  const date = new Date(excelDate);
+  return isNaN(date.getTime()) ? null : date.toISOString();
 };
+

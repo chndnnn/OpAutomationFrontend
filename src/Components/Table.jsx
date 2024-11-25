@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
+import { utils, writeFile } from "xlsx";
 import PopUp from "./Popup";
+import { BiReset } from "react-icons/bi";
+import { MdDownloadForOffline } from "react-icons/md";
 
-const Table = ({ excelData, errorDetaisl }) => {
+const Table = ({ excelData, errorDetaisl, setExcelData }) => {
   let [header, setHeader] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [duplicateRows, setDuplicateRows] = useState([]);
+  const [selectedHeaders, setSelectedHeader] = useState([]);
 
   useEffect(() => {
     if (excelData && excelData.length > 0) {
@@ -14,15 +19,102 @@ const Table = ({ excelData, errorDetaisl }) => {
     }
   }, [excelData]);
 
-  useEffect(() => {
-    console.log(header);
-  }, [header]);
+  function onFilterClicked(e) {
+    findDuplicates(e);
+    setSelectedHeader(e);
+    setShowModal(false);
+  }
+
+  function findDuplicates(selectedHeaders) {
+    if (!selectedHeaders.length) return;
+
+    // Create a map to track occurrences of header combinations
+    const uniqueKeyMap = new Map();
+    const duplicates = [];
+
+    excelData.forEach((row, index) => {
+      // Create a unique key for the selected headers
+      const key = selectedHeaders.map((header) => row[header]).join("|");
+
+      // Track occurrences
+      if (uniqueKeyMap.has(key)) {
+        duplicates.push(index); // Store duplicate row index
+      } else {
+        uniqueKeyMap.set(key, index);
+      }
+    });
+
+    setDuplicateRows(duplicates); // Store duplicate rows
+  }
+
+  function removeDuplicatesAndUpdateExcel(selectedHeaders) {
+    if (!selectedHeaders.length) return;
+
+    // Create a map to track unique rows based on selected headers
+    const uniqueKeyMap = new Map();
+
+    const filtered = excelData.filter((row) => {
+      // Create a unique key for the selected headers
+      const key = selectedHeaders.map((header) => row[header]).join("|");
+
+      // Keep the row only if the key is not already in the map
+      if (uniqueKeyMap.has(key)) {
+        return false; // Duplicate row
+      } else {
+        uniqueKeyMap.set(key, true);
+        return true; // Unique row
+      }
+    });
+
+    setExcelData(filtered); // Update the parent state with filtered data
+    exportToExcel(filtered); // Export the updated data to Excel
+    setDuplicateRows([]); // Reset duplicate rows
+  }
+
+  function exportToExcel(data) {
+    const worksheet = utils.json_to_sheet(data);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, "Filtered Data");
+    writeFile(workbook, "FilteredData.xlsx"); // Download file
+  }
 
   return (
     <div className="mt-4">
       {excelData.length > 0 ? (
         <div className="overflow-x-auto">
-          <button onClick={() => setShowModal(true)}>Check Duplicates</button>
+          <div className=" flex">
+            <span className="p-2 rounded">{excelData.length} ROWS </span>
+            <button
+              className="bg-black hover:text-yellow-600 text-white p-2 rounded mb-1"
+              onClick={() => setShowModal(true)}
+            >
+              Check Duplicates{" "}
+              <span className="text-red-500">
+                {duplicateRows.length !== 0 && duplicateRows.length}
+              </span>
+            </button>
+            {duplicateRows.length !== 0 && (
+              <>
+                <button
+                  onClick={() =>
+                    removeDuplicatesAndUpdateExcel(selectedHeaders)
+                  }
+                  className="bg-black flex items-center gap-1 text-white hover:text-yellow-600 p-2 rounded mb-1 ml-1"
+                >
+                  Remove Duplicates and Download
+                  <span className="text-lg">
+                    <MdDownloadForOffline />
+                  </span>
+                </button>
+                <button
+                  onClick={() => setDuplicateRows([])}
+                  className="bg-black text-xl text-white hover:text-yellow-600 px-3 rounded mb-1 ml-1"
+                >
+                  <BiReset />
+                </button>
+              </>
+            )}
+          </div>
           <table className="min-w-full table-auto border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-200 text-gray-700">
@@ -39,13 +131,16 @@ const Table = ({ excelData, errorDetaisl }) => {
             </thead>
             <tbody>
               {/* Dynamically render rows */}
-              {excelData.map((row, index) => (
+              {excelData.slice(0, 20).map((row, index) => (
                 <tr key={index} className="even:bg-gray-100">
                   {Object.values(row).map((value, colIndex) => (
                     <td
                       key={colIndex}
                       className={`border border-gray-300 px-4 py-2 ${
-                        errorDetaisl.lineNo == index ? "bg-red-300" : ""
+                        errorDetaisl?.lineNo == index ||
+                        duplicateRows.includes(index)
+                          ? "bg-red-300"
+                          : ""
                       }`}
                     >
                       {value !== null && value !== undefined ? value : "-"}
@@ -66,6 +161,7 @@ const Table = ({ excelData, errorDetaisl }) => {
           description={"Please check the columns"}
           onModalCloseClick={() => setShowModal(false)}
           header={header}
+          onFilterClicked={onFilterClicked}
         />
       )}
     </div>
