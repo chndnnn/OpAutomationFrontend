@@ -11,7 +11,12 @@ const Table = ({ excelData, errorDetaisl, setExcelData }) => {
   const [showModal, setShowModal] = useState(false);
   const [duplicateRows, setDuplicateRows] = useState([]);
   const [selectedHeaders, setSelectedHeader] = useState([]);
-  const [pagination, setPagination] = useState({ start: 0, end: 10, page: 1 });
+  const [selectedValue, setSelectedValue] = useState(10);
+  const [pagination, setPagination] = useState({
+    start: 0,
+    end: selectedValue,
+    page: 1,
+  });
 
   useEffect(() => {
     if (excelData && excelData.length > 0) {
@@ -105,11 +110,22 @@ const Table = ({ excelData, errorDetaisl, setExcelData }) => {
     }
   }
 
+  function onSelectChange(e) {
+    let data = +e.target.value; // Convert the selected value to a number
+    setSelectedValue(data);
+    setPagination((prev) => {
+      return {
+        ...prev,
+        end: prev.start + data, // Adjust `end` based on `start` and the new value
+      };
+    });
+  }
+
   return (
-    <div className="mt-4">
+    <div className="mt-1">
       {excelData.length > 0 ? (
         <div className="overflow-x-auto">
-          <div className=" flex justify-between items-center border border-green-500">
+          <div className=" flex justify-between items-center">
             <div className="flex">
               <span className="p-2 rounded">{excelData.length} ROWS </span>
               <button
@@ -143,16 +159,32 @@ const Table = ({ excelData, errorDetaisl, setExcelData }) => {
                 </>
               )}
             </div>
-            <div className="flex mr-2 border border-red-500 justify-center items-center">
-              <FaCaretLeft
-                onClick={onLeftPaginateClick}
-                className="text-lg cursor-pointer"
-              />
-              <span>{pagination.page}</span>
-              <FaCaretRight
-                onClick={onRightPaginateClick}
-                className="text-xl cursor-pointer"
-              />
+            <div className="flex mr-2  gap-2 justify-center items-center">
+              <div>
+                <select
+                  className="bg-black text-white rounded p-1 cursor-pointer"
+                  name=""
+                  id=""
+                  value={selectedValue}
+                  onChange={onSelectChange}
+                >
+                  <option value="10">10</option>
+                  <option value="100">100</option>
+                  <option value="500">500</option>
+                  <option value="1000">1000</option>
+                </select>
+              </div>
+              <div className=" gap-2 flex">
+                <FaCaretLeft
+                  onClick={onLeftPaginateClick}
+                  className="text-lg cursor-pointer hover:scale-150 rounded-full hover:text-neutral-500"
+                />
+                <span>{pagination.page}</span>
+                <FaCaretRight
+                  onClick={onRightPaginateClick}
+                  className="text-xl cursor-pointer rounded-full hover:scale-150 hover:text-neutral-500"
+                />
+              </div>
             </div>
           </div>
           <table className="min-w-full table-auto border-collapse border border-gray-300">
