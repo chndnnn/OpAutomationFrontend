@@ -3,12 +3,15 @@ import { utils, writeFile } from "xlsx";
 import PopUp from "./Popup";
 import { BiReset } from "react-icons/bi";
 import { MdDownloadForOffline } from "react-icons/md";
+import { FaCaretLeft } from "react-icons/fa6";
+import { FaCaretRight } from "react-icons/fa";
 
 const Table = ({ excelData, errorDetaisl, setExcelData }) => {
   let [header, setHeader] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [duplicateRows, setDuplicateRows] = useState([]);
   const [selectedHeaders, setSelectedHeader] = useState([]);
+  const [pagination, setPagination] = useState({ start: 0, end: 10, page: 1 });
 
   useEffect(() => {
     if (excelData && excelData.length > 0) {
@@ -78,42 +81,79 @@ const Table = ({ excelData, errorDetaisl, setExcelData }) => {
     writeFile(workbook, "FilteredData.xlsx"); // Download file
   }
 
+  function onRightPaginateClick() {
+    let data = pagination.end - pagination.start;
+    setPagination((prev) => {
+      return {
+        start: prev.end,
+        end: prev.end + data,
+        page: prev.page + 1,
+      };
+    });
+  }
+
+  function onLeftPaginateClick() {
+    let data = pagination.end - pagination.start;
+    if (pagination.start > 0) {
+      setPagination((prev) => {
+        return {
+          start: prev.start - data,
+          end: prev.end - data,
+          page: prev.page - 1,
+        };
+      });
+    }
+  }
+
   return (
     <div className="mt-4">
       {excelData.length > 0 ? (
         <div className="overflow-x-auto">
-          <div className=" flex">
-            <span className="p-2 rounded">{excelData.length} ROWS </span>
-            <button
-              className="bg-black hover:text-yellow-600 text-white p-2 rounded mb-1"
-              onClick={() => setShowModal(true)}
-            >
-              Check Duplicates{" "}
-              <span className="text-red-500">
-                {duplicateRows.length !== 0 && duplicateRows.length}
-              </span>
-            </button>
-            {duplicateRows.length !== 0 && (
-              <>
-                <button
-                  onClick={() =>
-                    removeDuplicatesAndUpdateExcel(selectedHeaders)
-                  }
-                  className="bg-black flex items-center gap-1 text-white hover:text-yellow-600 p-2 rounded mb-1 ml-1"
-                >
-                  Remove Duplicates and Download
-                  <span className="text-lg">
-                    <MdDownloadForOffline />
-                  </span>
-                </button>
-                <button
-                  onClick={() => setDuplicateRows([])}
-                  className="bg-black text-xl text-white hover:text-yellow-600 px-3 rounded mb-1 ml-1"
-                >
-                  <BiReset />
-                </button>
-              </>
-            )}
+          <div className=" flex justify-between items-center border border-green-500">
+            <div className="flex">
+              <span className="p-2 rounded">{excelData.length} ROWS </span>
+              <button
+                className="bg-black hover:text-yellow-600 text-white p-2 rounded mb-1"
+                onClick={() => setShowModal(true)}
+              >
+                Check Duplicates{" "}
+                <span className="text-red-500">
+                  {duplicateRows.length !== 0 && duplicateRows.length}
+                </span>
+              </button>
+              {duplicateRows.length !== 0 && (
+                <>
+                  <button
+                    onClick={() =>
+                      removeDuplicatesAndUpdateExcel(selectedHeaders)
+                    }
+                    className="bg-black flex items-center gap-1 text-white hover:text-yellow-600 p-2 rounded mb-1 ml-1"
+                  >
+                    Remove Duplicates and Download
+                    <span className="text-lg">
+                      <MdDownloadForOffline />
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setDuplicateRows([])}
+                    className="bg-black text-xl text-white hover:text-yellow-600 px-3 rounded mb-1 ml-1"
+                  >
+                    <BiReset />
+                  </button>
+                </>
+              )}
+            </div>
+            <div className="flex mr-2 border border-red-500 justify-center items-center">
+              <FaCaretLeft
+                onClick={onLeftPaginateClick}
+                className="text-lg cursor-pointer"
+              />
+              <span>{pagination.page}</span>
+              <FaCaretRight
+                onClick={onRightPaginateClick}
+                className="text-xl cursor-pointer"
+              />
+            </div>
           </div>
           <table className="min-w-full table-auto border-collapse border border-gray-300">
             <thead>
@@ -131,23 +171,25 @@ const Table = ({ excelData, errorDetaisl, setExcelData }) => {
             </thead>
             <tbody>
               {/* Dynamically render rows */}
-              {excelData.slice(0, 20).map((row, index) => (
-                <tr key={index} className="even:bg-gray-100">
-                  {Object.values(row).map((value, colIndex) => (
-                    <td
-                      key={colIndex}
-                      className={`border border-gray-300 px-4 py-2 ${
-                        errorDetaisl?.lineNo == index ||
-                        duplicateRows.includes(index)
-                          ? "bg-red-300"
-                          : ""
-                      }`}
-                    >
-                      {value !== null && value !== undefined ? value : "-"}
-                    </td>
-                  ))}
-                </tr>
-              ))}
+              {excelData
+                .slice(pagination.start, pagination.end)
+                .map((row, index) => (
+                  <tr key={index} className="even:bg-gray-100">
+                    {Object.values(row).map((value, colIndex) => (
+                      <td
+                        key={colIndex}
+                        className={`border border-gray-300 px-4 py-2 ${
+                          errorDetaisl?.lineNo == index ||
+                          duplicateRows.includes(index)
+                            ? "bg-red-300"
+                            : ""
+                        }`}
+                      >
+                        {value !== null && value !== undefined ? value : "-"}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

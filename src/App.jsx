@@ -3,7 +3,6 @@ import LoginScreen from "./Screens/LoginScreen";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./Screens/Home";
 import ContextProvider from "./Context/GlobalContext";
-import DuplicateFinder from "./Components/DuplicateFinder";
 
 function App() {
   const router = createBrowserRouter([
