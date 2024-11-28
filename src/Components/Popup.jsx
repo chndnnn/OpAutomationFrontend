@@ -7,6 +7,7 @@ const PopUp = ({
   description,
   header,
   onFilterClicked,
+  ondeleteDataClick,
 }) => {
   const [choosenHeader, setChoosenHeader] = useState([]);
 
@@ -21,6 +22,14 @@ const PopUp = ({
     }
   }
 
+  function onDoneClick() {
+    if (description.includes("delete")) {
+      ondeleteDataClick();
+    } else {
+      onFilterClicked(choosenHeader);
+    }
+  }
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white flex flex-col rounded-lg p-6 shadow-lg max-w-md w-full overflow-y-auto">
@@ -28,7 +37,7 @@ const PopUp = ({
           <>
             {description}
             <div className="grid grid-cols-2">
-              {header.map((key) => (
+              {header?.map((key) => (
                 <div>
                   <input
                     type="checkbox"
@@ -57,7 +66,7 @@ const PopUp = ({
           </button>
           {description && (
             <button
-              onClick={() => onFilterClicked(choosenHeader)}
+              onClick={onDoneClick}
               className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring focus:ring-red-300"
             >
               Done

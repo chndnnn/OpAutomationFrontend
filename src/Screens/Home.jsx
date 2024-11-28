@@ -18,6 +18,7 @@ const Home = () => {
     lineNo: undefined,
   }); // State to store error details
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [deleteConfirmationPopup, setDeleteConfirmationPopup] = useState(false);
   const nav = useNavigate();
 
   useEffect(() => {
@@ -88,10 +89,19 @@ const Home = () => {
     }
   }
 
+  function ondeleteClick() {
+    setDeleteConfirmationPopup(true);
+  }
+
   function onLogoutClick() {
     localStorage.removeItem("token");
     localStorage.removeItem("client");
     nav("/");
+  }
+
+  function ondeleteDataClick() {
+    alert("Deleted Successfullt");
+    setDeleteConfirmationPopup(false);
   }
 
   return (
@@ -119,6 +129,12 @@ const Home = () => {
           >
             {loadingWhileSubmitin ? "Uplaoding...." : "Uplaod Data to DB"}
           </button>
+          <button
+            onClick={ondeleteClick}
+            className="px-4 py-2 ml-1 bg-neutral-800 text-white rounded-lg hover:text-yellow-600 focus:outline-none focus:ring focus:ring-blue-300"
+          >
+            {loadingWhileSubmitin ? "Uplaoding...." : "Delete all data"}
+          </button>
         </div>
         {/* <div>Hii</div> */}
       </div>
@@ -142,6 +158,15 @@ const Home = () => {
         <PopUp
           errorDetails={errorDetails}
           onModalCloseClick={() => setShowErrorModal(false)}
+        />
+      )}
+      {deleteConfirmationPopup && (
+        <PopUp
+          description={
+            "Do you really want to delete all the data from DB permenantly"
+          }
+          onModalCloseClick={() => setDeleteConfirmationPopup(false)}
+          ondeleteDataClick={ondeleteDataClick}
         />
       )}
     </div>

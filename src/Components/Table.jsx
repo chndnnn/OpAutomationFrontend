@@ -6,191 +6,170 @@ import { MdDownloadForOffline } from "react-icons/md";
 import { FaCaretLeft } from "react-icons/fa6";
 import { FaCaretRight } from "react-icons/fa";
 
-const Table = ({ excelData, errorDetaisl, setExcelData }) => {
-  let [header, setHeader] = useState([]);
+const Table = ({ excelData, errorDetails, setExcelData }) => {
+  const [header, setHeader] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [duplicateRows, setDuplicateRows] = useState([]);
-  const [selectedHeaders, setSelectedHeader] = useState([]);
-  const [selectedValue, setSelectedValue] = useState(10);
+  const [selectedHeaders, setSelectedHeaders] = useState([]);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [pagination, setPagination] = useState({
     start: 0,
-    end: selectedValue,
+    end: 10,
     page: 1,
   });
 
+  // Extract headers from Excel data
   useEffect(() => {
     if (excelData && excelData.length > 0) {
-      let data = Object.keys(excelData[0]).map((key) => key);
-      setHeader(data);
+      setHeader(Object.keys(excelData[0]));
     } else {
-      setHeader([]); // Clear the headers if no data
+      setHeader([]); // Clear headers if no data
     }
   }, [excelData]);
 
-  function onFilterClicked(e) {
-    findDuplicates(e);
-    setSelectedHeader(e);
-    setShowModal(false);
-  }
-
-  function findDuplicates(selectedHeaders) {
+  // Handle duplicate detection
+  const findDuplicates = (selectedHeaders) => {
     if (!selectedHeaders.length) return;
 
-    // Create a map to track occurrences of header combinations
     const uniqueKeyMap = new Map();
     const duplicates = [];
 
     excelData.forEach((row, index) => {
-      // Create a unique key for the selected headers
       const key = selectedHeaders.map((header) => row[header]).join("|");
 
-      // Track occurrences
       if (uniqueKeyMap.has(key)) {
-        duplicates.push(index); // Store duplicate row index
+        duplicates.push(index);
       } else {
         uniqueKeyMap.set(key, index);
       }
     });
 
-    setDuplicateRows(duplicates); // Store duplicate rows
-  }
+    setDuplicateRows(duplicates);
+  };
 
-  function removeDuplicatesAndUpdateExcel(selectedHeaders) {
+  const removeDuplicatesAndDownload = () => {
     if (!selectedHeaders.length) return;
 
-    // Create a map to track unique rows based on selected headers
     const uniqueKeyMap = new Map();
-
-    const filtered = excelData.filter((row) => {
-      // Create a unique key for the selected headers
+    const filteredData = excelData.filter((row) => {
       const key = selectedHeaders.map((header) => row[header]).join("|");
 
-      // Keep the row only if the key is not already in the map
       if (uniqueKeyMap.has(key)) {
-        return false; // Duplicate row
+        return false;
       } else {
         uniqueKeyMap.set(key, true);
-        return true; // Unique row
+        return true;
       }
     });
 
-    setExcelData(filtered); // Update the parent state with filtered data
-    exportToExcel(filtered); // Export the updated data to Excel
-    setDuplicateRows([]); // Reset duplicate rows
-  }
+    setExcelData(filteredData);
+    exportToExcel(filteredData);
+    setDuplicateRows([]);
+  };
 
-  function exportToExcel(data) {
+  // Export filtered data to Excel
+  const exportToExcel = (data) => {
     const worksheet = utils.json_to_sheet(data);
     const workbook = utils.book_new();
     utils.book_append_sheet(workbook, worksheet, "Filtered Data");
-    writeFile(workbook, "FilteredData.xlsx"); // Download file
-  }
+    writeFile(workbook, "FilteredData.xlsx");
+  };
 
-  function onRightPaginateClick() {
-    let data = pagination.end - pagination.start;
-    setPagination((prev) => {
-      return {
-        start: prev.end,
-        end: prev.end + data,
-        page: prev.page + 1,
-      };
-    });
-  }
+  // Pagination handling
+  const handleNextPage = () => {
+    if (pagination.end >= excelData.length) return;
 
-  function onLeftPaginateClick() {
-    let data = pagination.end - pagination.start;
-    if (pagination.start > 0) {
-      setPagination((prev) => {
-        return {
-          start: prev.start - data,
-          end: prev.end - data,
-          page: prev.page - 1,
-        };
-      });
-    }
-  }
+    const rowsCount = pagination.end - pagination.start;
+    setPagination((prev) => ({
+      start: prev.end,
+      end: prev.end + rowsCount,
+      page: prev.page + 1,
+    }));
+  };
 
-  function onSelectChange(e) {
-    let data = +e.target.value; // Convert the selected value to a number
-    setSelectedValue(data);
-    setPagination((prev) => {
-      return {
-        ...prev,
-        end: prev.start + data, // Adjust `end` based on `start` and the new value
-      };
-    });
-  }
+  const handlePreviousPage = () => {
+    if (pagination.start <= 0) return;
+
+    const rowsCount = pagination.end - pagination.start;
+    setPagination((prev) => ({
+      start: prev.start - rowsCount,
+      end: prev.end - rowsCount,
+      page: prev.page - 1,
+    }));
+  };
+
+  const handleRowsPerPageChange = (e) => {
+    const newRowsPerPage = parseInt(e.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
+    setPagination((prev) => ({
+      start: 0,
+      end: newRowsPerPage,
+      page: 1,
+    }));
+  };
 
   return (
     <div className="mt-1">
       {excelData.length > 0 ? (
         <div className="overflow-x-auto">
-          <div className=" flex justify-between items-center">
-            <div className="flex">
-              <span className="p-2 rounded">{excelData.length} ROWS </span>
+          <div className="flex justify-between items-center mb-2">
+            <div className="flex gap-2 items-center">
+              <span className="p-2 rounded">{excelData.length} Rows</span>
               <button
-                className="bg-black hover:text-yellow-600 text-white p-2 rounded mb-1"
+                className="bg-black hover:text-yellow-600 text-white p-2 rounded"
                 onClick={() => setShowModal(true)}
               >
                 Check Duplicates{" "}
                 <span className="text-red-500">
-                  {duplicateRows.length !== 0 && duplicateRows.length}
+                  {duplicateRows.length > 0 && duplicateRows.length}
                 </span>
               </button>
-              {duplicateRows.length !== 0 && (
+              {duplicateRows.length > 0 && (
                 <>
                   <button
-                    onClick={() =>
-                      removeDuplicatesAndUpdateExcel(selectedHeaders)
-                    }
-                    className="bg-black flex items-center gap-1 text-white hover:text-yellow-600 p-2 rounded mb-1 ml-1"
+                    onClick={removeDuplicatesAndDownload}
+                    className="bg-black flex items-center gap-1 text-white hover:text-yellow-600 p-2 rounded"
                   >
                     Remove Duplicates and Download
-                    <span className="text-lg">
-                      <MdDownloadForOffline />
-                    </span>
+                    <MdDownloadForOffline />
                   </button>
                   <button
+                  
                     onClick={() => setDuplicateRows([])}
-                    className="bg-black text-xl text-white hover:text-yellow-600 px-3 rounded mb-1 ml-1"
+                    className="bg-black text-xl p-2 text-white hover:text-yellow-600 px-3 rounded"
                   >
                     <BiReset />
                   </button>
                 </>
               )}
             </div>
-            <div className="flex mr-2  gap-2 justify-center items-center">
-              <div>
-                <select
-                  className="bg-black text-white rounded p-1 cursor-pointer"
-                  name=""
-                  id=""
-                  value={selectedValue}
-                  onChange={onSelectChange}
-                >
-                  <option value="10">10</option>
-                  <option value="100">100</option>
-                  <option value="500">500</option>
-                  <option value="1000">1000</option>
-                </select>
-              </div>
-              <div className=" gap-2 flex">
+            <div className="flex items-center gap-2">
+              <select
+                className="bg-black text-white rounded p-1 cursor-pointer"
+                value={rowsPerPage}
+                onChange={handleRowsPerPageChange}
+              >
+                <option value={10}>10</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value={500}>500</option>
+              </select>
+              <div className="flex items-center gap-2">
                 <FaCaretLeft
-                  onClick={onLeftPaginateClick}
-                  className="text-lg cursor-pointer hover:scale-150 rounded-full hover:text-neutral-500"
+                  onClick={handlePreviousPage}
+                  className="cursor-pointer hover:scale-110 text-gray-600"
                 />
-                <span>{pagination.page}</span>
+                <span>Page {pagination.page}</span>
                 <FaCaretRight
-                  onClick={onRightPaginateClick}
-                  className="text-xl cursor-pointer rounded-full hover:scale-150 hover:text-neutral-500"
+                  onClick={handleNextPage}
+                  className="cursor-pointer hover:scale-110 text-gray-600"
                 />
               </div>
             </div>
           </div>
-          <table className="min-w-full table-auto border-collapse border border-gray-300">
+          <table className="min-w-full table-auto border border-gray-300">
             <thead>
               <tr className="bg-gray-200 text-gray-700">
-                {/* Dynamically render column headers */}
                 {header.map((key) => (
                   <th
                     key={key}
@@ -202,26 +181,29 @@ const Table = ({ excelData, errorDetaisl, setExcelData }) => {
               </tr>
             </thead>
             <tbody>
-              {/* Dynamically render rows */}
               {excelData
                 .slice(pagination.start, pagination.end)
-                .map((row, index) => (
-                  <tr key={index} className="even:bg-gray-100">
-                    {Object.values(row).map((value, colIndex) => (
-                      <td
-                        key={colIndex}
-                        className={`border border-gray-300 px-4 py-2 ${
-                          errorDetaisl?.lineNo == index ||
-                          duplicateRows.includes(index)
-                            ? "bg-red-300"
-                            : ""
-                        }`}
-                      >
-                        {value !== null && value !== undefined ? value : "-"}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
+                .map((row, index) => {
+                  const actualIndex = pagination.start + index;
+                  const isDuplicate = duplicateRows.includes(actualIndex);
+                  return (
+                    <tr
+                      key={actualIndex}
+                      className={`${
+                        isDuplicate ? "bg-red-300" : "even:bg-gray-100"
+                      }`}
+                    >
+                      {header.map((col) => (
+                        <td
+                          key={col}
+                          className="border border-gray-300 px-4 py-2"
+                        >
+                          {row[col] ?? "-"}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>
@@ -232,10 +214,14 @@ const Table = ({ excelData, errorDetaisl, setExcelData }) => {
       )}
       {showModal && (
         <PopUp
-          description={"Please check the columns"}
+          description="Select columns to check for duplicates"
           onModalCloseClick={() => setShowModal(false)}
           header={header}
-          onFilterClicked={onFilterClicked}
+          onFilterClicked={(e) => {
+            findDuplicates(e);
+            setSelectedHeaders(e);
+            setShowModal(false);
+          }}
         />
       )}
     </div>
