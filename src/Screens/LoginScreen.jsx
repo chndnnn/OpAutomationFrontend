@@ -43,8 +43,8 @@ const LoginScreen = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white shadow-lg rounded-lg p-8 max-w-sm w-full">
+    <div className="flex items-center justify-center min-h-screen bg-black">
+      <div className="bg-gradient-to-tr from-yellow-600 via-orange-600 to-yellow-300 shadow-lg rounded-lg p-8 max-w-sm w-full">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Login</h2>
         <form>
           <div className="mb-4">
@@ -59,7 +59,7 @@ const LoginScreen = () => {
               id="email"
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-300 focus:outline-none"
+              className="w-full px-4 py-2 bg-transparent placeholder-black border border-black rounded-lg"
               required
             />
           </div>
@@ -75,14 +75,14 @@ const LoginScreen = () => {
               id="password"
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-300 focus:outline-none"
+              className="w-full  bg-transparent px-4 py-2 border placeholder-black rounded-lg border-black"
               required
             />
           </div>
           <button
             type="submit"
             onClick={onSubmitClick}
-            className="w-full px-4 py-2 bg-black text-white font-medium rounded-lg hover:hover:text-yellow-600 focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full px-4 py-2 bg-gradient-to-b from-black to-purple-700 text-white font-medium rounded-lg hover:hover:text-yellow-600 focus:outline-none focus:ring focus:ring-blue-300"
           >
             Login
           </button>

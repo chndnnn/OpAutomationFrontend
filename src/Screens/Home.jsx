@@ -125,7 +125,7 @@ const Home = () => {
         <div>
           <span
             onClick={onLogoutClick}
-            className="absolute right-5 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 hover:text-black cursor-pointer py-1 rounded"
+            className="absolute right-7 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 hover:text-black cursor-pointer py-1 rounded"
           >
             Logout
           </span>
@@ -156,7 +156,7 @@ const Home = () => {
             {"Delete all data"}
           </button>
         </div>
-        <div className="flex bg-gradient-to-b from-yellow-500 via-yellow-900 to-yellow-200 bg-clip-text text-transparent  justify-center items-center text-6xl font-bold w-full">
+        <div className="flex bg-gradient-to-br from-yellow-100 via-yellow-600 to-yellow-100 bg-clip-text text-transparent  justify-center items-center text-6xl font-bold w-full">
           {localStorage.getItem("client").toUpperCase()}
         </div>
       </div>
