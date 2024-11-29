@@ -156,7 +156,9 @@ const Home = () => {
             {"Delete all data"}
           </button>
         </div>
-        {/* <div>Hii</div> */}
+        <div className="flex bg-gradient-to-b from-yellow-500 via-yellow-900 to-yellow-200 bg-clip-text text-transparent  justify-center items-center text-6xl font-bold w-full">
+          {localStorage.getItem("client").toUpperCase()}
+        </div>
       </div>
       <h3 className="text-lg text-white font-semibold mt-6 items-center flex gap-2">
         Preview Data
