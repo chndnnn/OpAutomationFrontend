@@ -100,8 +100,23 @@ const Home = () => {
   }
 
   function ondeleteDataClick() {
-    alert("Deleted Successfullt");
-    setDeleteConfirmationPopup(false);
+    deleteAllDatainDb();
+  }
+
+  async function deleteAllDatainDb() {
+    let data = {
+      customer: localStorage.getItem("client"),
+    };
+    try {
+      let response = axios.post(
+        "http://127.0.0.1:3001/opData/v1/DeleteInvoiceDetails",
+        data
+      );
+      setDeleteConfirmationPopup(false);
+    } catch (err) {
+      console.log(err.message);
+      setDeleteConfirmationPopup(false);
+    }
   }
 
   return (
@@ -110,35 +125,40 @@ const Home = () => {
         <div>
           <span
             onClick={onLogoutClick}
-            className="absolute right-5 bg-black text-white px-3 hover:text-yellow-600 cursor-pointer py-1 rounded"
+            className="absolute right-5 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 hover:text-black cursor-pointer py-1 rounded"
           >
             Logout
           </span>
-          <h2 className="text-xl font-bold mb-4">Upload Excel File</h2>
+          <h2 className="text-xl font-bold text-white mb-4">
+            <span className="font-bold bg-gradient-to-r from-yellow-600 to-yellow-500 bg-clip-text text-transparent text-2xl">
+              U
+            </span>
+            pload Excel File
+          </h2>
           {loading && <div>Loading..</div>}
           <input
             type="file"
             accept=".xlsx, .xls"
             onChange={handleFileUpload}
-            className="mb-4 block text-sm text-gray-600 border border-gray-300 rounded-lg cursor-pointer focus:outline-none focus:ring focus:ring-blue-300"
+            className="mb-4 block text-sm w-[19rem] text-gray-300 border border-gray-300 rounded cursor-pointer focus:outline-none focus:ring focus:ring-blue-300"
           />
 
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 bg-black text-white rounded-lg hover:text-yellow-600 focus:outline-none focus:ring focus:ring-blue-300"
+            className="px-4 py-2 bg-gradient-to-r from-green-900 via-green-600 to-green-700 text-white rounded-lg hover:text-black focus:outline-none focus:ring focus:ring-blue-300"
           >
             {loadingWhileSubmitin ? "Uplaoding...." : "Uplaod Data to DB"}
           </button>
           <button
             onClick={ondeleteClick}
-            className="px-4 py-2 ml-1 bg-neutral-800 text-white rounded-lg hover:text-yellow-600 focus:outline-none focus:ring focus:ring-blue-300"
+            className="px-4 py-2 ml-1 bg-gradient-to-b from-red-900 to-red-700 text-white rounded-lg hover:text-black focus:outline-none focus:ring focus:ring-blue-300"
           >
-            {loadingWhileSubmitin ? "Uplaoding...." : "Delete all data"}
+            {"Delete all data"}
           </button>
         </div>
         {/* <div>Hii</div> */}
       </div>
-      <h3 className="text-lg font-semibold mt-6 items-center flex gap-2">
+      <h3 className="text-lg text-white font-semibold mt-6 items-center flex gap-2">
         Preview Data
         {loading && (
           <span>
@@ -146,7 +166,7 @@ const Home = () => {
           </span>
         )}
       </h3>
-      <pre className="mt-4 p-4 bg-gray-100 rounded-lg overflow-x-auto text-sm">
+      <pre className="mt-4 p-4 bg-gray-800 rounded-lg overflow-x-auto text-sm">
         <Table
           excelData={excelData}
           errorDetaisl={errorDetails}

@@ -114,13 +114,15 @@ const Table = ({ excelData, errorDetails, setExcelData }) => {
         <div className="overflow-x-auto">
           <div className="flex justify-between items-center mb-2">
             <div className="flex gap-2 items-center">
-              <span className="p-2 rounded">{excelData.length} Rows</span>
+              <span className="p-2 text-white rounded">
+                {excelData.length} Rows
+              </span>
               <button
-                className="bg-black hover:text-yellow-600 text-white p-2 rounded"
+                className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:text-yellow-600 text-black p-2 rounded"
                 onClick={() => setShowModal(true)}
               >
                 Check Duplicates{" "}
-                <span className="text-red-500">
+                <span className="text-red-950">
                   {duplicateRows.length > 0 && duplicateRows.length}
                 </span>
               </button>
@@ -128,15 +130,14 @@ const Table = ({ excelData, errorDetails, setExcelData }) => {
                 <>
                   <button
                     onClick={removeDuplicatesAndDownload}
-                    className="bg-black flex items-center gap-1 text-white hover:text-yellow-600 p-2 rounded"
+                    className="bg-gradient-to-r from-yellow-500 to-yellow-400 flex items-center gap-1 text-black hover:text-yellow-600 p-2 rounded"
                   >
                     Remove Duplicates and Download
                     <MdDownloadForOffline />
                   </button>
                   <button
-                  
                     onClick={() => setDuplicateRows([])}
-                    className="bg-black text-xl p-2 text-white hover:text-yellow-600 px-3 rounded"
+                    className="bg-gradient-to-b from-yellow-500 via-yellow-700 to-yellow-600 text-xl p-2 text-black hover:text-yellow-600 px-3 rounded"
                   >
                     <BiReset />
                   </button>
@@ -145,7 +146,7 @@ const Table = ({ excelData, errorDetails, setExcelData }) => {
             </div>
             <div className="flex items-center gap-2">
               <select
-                className="bg-black text-white rounded p-1 cursor-pointer"
+                className="bg-gradient-to-b from-yellow-600 to bg-yellow-500 text-black rounded p-1 cursor-pointer"
                 value={rowsPerPage}
                 onChange={handleRowsPerPageChange}
               >
@@ -154,26 +155,26 @@ const Table = ({ excelData, errorDetails, setExcelData }) => {
                 <option value={100}>100</option>
                 <option value={500}>500</option>
               </select>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <FaCaretLeft
                   onClick={handlePreviousPage}
-                  className="cursor-pointer hover:scale-110 text-gray-600"
+                  className="cursor-pointer text-xl hover:scale-110 text-gray-600"
                 />
-                <span>Page {pagination.page}</span>
+                <span className="text-white">Page {pagination.page}</span>
                 <FaCaretRight
                   onClick={handleNextPage}
-                  className="cursor-pointer hover:scale-110 text-gray-600"
+                  className="cursor-pointer text-xl hover:scale-110 text-gray-600"
                 />
               </div>
             </div>
           </div>
           <table className="min-w-full table-auto border border-gray-300">
             <thead>
-              <tr className="bg-gray-200 text-gray-700">
+              <tr className="bg-black text-neutral-200">
                 {header.map((key) => (
                   <th
                     key={key}
-                    className="border border-gray-300 px-4 py-2 text-left"
+                    className="border border-gray-600 px-4 py-2 text-left"
                   >
                     {key}
                   </th>
@@ -190,13 +191,15 @@ const Table = ({ excelData, errorDetails, setExcelData }) => {
                     <tr
                       key={actualIndex}
                       className={`${
-                        isDuplicate ? "bg-red-300" : "even:bg-gray-100"
+                        isDuplicate
+                          ? "bg-red-800"
+                          : "bg-gray-700 text-neutral-200"
                       }`}
                     >
                       {header.map((col) => (
                         <td
                           key={col}
-                          className="border border-gray-300 px-4 py-2"
+                          className="border border-gray-600 px-4 py-2"
                         >
                           {row[col] ?? "-"}
                         </td>

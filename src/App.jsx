@@ -18,7 +18,9 @@ function App() {
   return (
     <>
       <ContextProvider>
-        <RouterProvider router={router} />
+        <div className="bg-black min-h-screen ">
+          <RouterProvider router={router} />
+        </div>
       </ContextProvider>
     </>
   );
